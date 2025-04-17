@@ -1,0 +1,113 @@
+.app-main {
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+}
+
+.form-label {
+    padding-top: 1em;
+}
+
+.setting-panel {
+    background-color: white;
+    border-radius: 0.5em;
+    margin-left: 1em;
+    margin-right: 1em;
+    margin-bottom: 1em;
+}
+
+.setting-panel-content {
+    padding: 1em;
+    border-top-width: 0.3em;
+    border-radius: 0px;
+    border-color: gray;
+}
+
+.setting-panel-toggle-button {
+    font-size: 1em;
+}
+
+.form-label {
+    margin-bottom: 0;
+}
+
+#beatsaverEmbed {
+    min-width: 40em;
+    border: none;
+    border-radius: 4px;
+}
+
+.map-action-panel {
+    width: 100%;
+    display: flex;
+}
+
+.map-basic-info {
+    width: 50%;
+    margin-right: 1em;
+}
+
+.difficulty-pd {
+    width: 100%;
+}
+
+.map-actions {
+    width: 50%;
+    margin-top: 1em;
+    margin-left: 1em;
+}
+
+.difficulty-detail-info {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    margin-top: 1em;
+}
+
+.difficulty-detail-value {
+    margin-right: 1em;
+}
+
+.map-checker-endpoint-information-message {
+    margin-top: 1em;
+}
+
+.map-checker-endpoint-information-message-txt {
+    display: block;
+    color: red;
+}
+
+.map-checker-result {
+    margin-top: 1em;
+}
+
+.bi-check-circle-fill {
+    color: green;
+}
+
+.bi-exclamation-circle-fill {
+    color: red;
+}
+
+.song-name-text {
+    font-size: 1.2em;
+}
+
+.nsfw-flag {
+    color: orange;
+    font-weight: bold;
+}
+
+.warning-flag {
+    color: orange;
+    font-weight: bold;
+}
+
+.auth-panel {
+    margin-top: 1em;
+}
+
+.auth-header-text {
+    font-size: 1.5em;
+}
+
+.auth-button {
+    margin-top: 0.5em;
+}
