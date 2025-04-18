@@ -244,6 +244,7 @@ export default function Home() {
 
   async function generate() {
     setGenerating(true);
+    setSearchMessage("");
     try {
       await mainSearch();
     } catch (e) {
