@@ -67,10 +67,15 @@ options.set("automapper", "3");
 const checkerEndpoints: [string, boolean][] = [];
 process.env.checkerEndpoints
   ?.split("|")
+  .map(url => url.endsWith("/") ? url.slice(0, -1) : url)
   .forEach((url) => checkerEndpoints.push([url, true]));
 
-const warnMapCheckEndpoint = process.env.warnMapCheckEndpoint;
-const tournamentSystemEndpoint = process.env.tournamentSystemEndpoint;
+const warnMapCheckEndpoint = process.env.warnMapCheckEndpoint?.endsWith("/")
+  ? process.env.warnMapCheckEndpoint.slice(0, -1)
+  : process.env.warnMapCheckEndpoint;
+const tournamentSystemEndpoint = process.env.tournamentSystemEndpoint?.endsWith("/")
+  ? process.env.tournamentSystemEndpoint.slice(0, -1)
+  : process.env.tournamentSystemEndpoint;
 
 export default function Home() {
   const [hash, setHash] = useState<string>("");
