@@ -532,7 +532,7 @@ export default function Home() {
       valid = false;
       reason.push("0ノーツ");
     }
-    if (diff.nps <= minNPS || diff.nps >= maxNPS) {
+    if (diff.nps < minNPS || diff.nps > maxNPS) {
       valid = false;
       reason.push("NPS制限");
     }
