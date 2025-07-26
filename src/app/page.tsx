@@ -1,5 +1,6 @@
 "use client";
 import { useState, useEffect } from "react";
+import { useSearchParams } from 'next/navigation'
 import axios, { AxiosError, AxiosHeaders } from "axios";
 import "bootstrap/dist/css/bootstrap.min.css";
 import "bootstrap-icons/font/bootstrap-icons.css";
@@ -51,18 +52,74 @@ const characteristicDifficultyMap = new Map<
   string,
   Map<string, DifficultyInfo>
 >();
-const options: Map<string, string> = new Map();
-options.set("minBSR", "1");
-options.set("minDuration", "30");
-options.set("maxDuration", "420");
-options.set("minNPS", "0");
-options.set("maxNPS", "8");
-options.set("noodle", "2");
-options.set("me", "2");
-options.set("chroma", "3");
-options.set("cinema", "3");
-options.set("vivify", "3");
-options.set("automapper", "3");
+
+const optionKeys = [
+  "minBSR",
+  "maxBSR",
+  "minDuration",
+  "maxDuration",
+  "minNPS",
+  "maxNPS",
+  "minBPM",
+  "maxBPM",
+  "noodle",
+  "me",
+  "chroma",
+  "cinema",
+  "vivify",
+  "automapper",
+]
+const options: Map<string, string> = new Map([
+    ["minBSR", "1"],
+    ["maxBSR", ""],
+    ["minDuration", "30"],
+    ["maxDuration", "420"],
+    ["minNPS", "0"],
+    ["maxNPS", "8"],
+    ["minBPM", ""],
+    ["maxBPM", ""],
+    ["noodle", "2"],
+    ["me", "2"],
+    ["chroma", "3"],
+    ["cinema", "3"],
+    ["vivify", "3"],
+    ["automapper", "3"],
+  ]);
+
+const optionsPresets: Map<string, Map<string, string>> = new Map([
+  ["ssj-g1", new Map<string, string>([
+    ["minBSR", "1"],
+    ["maxBSR", ""],
+    ["minDuration", "30"],
+    ["maxDuration", "420"],
+    ["minNPS", "0"],
+    ["maxNPS", ""],
+    ["minBPM", ""],
+    ["maxBPM", ""],
+    ["noodle", "2"],
+    ["me", "2"],
+    ["chroma", "3"],
+    ["cinema", "3"],
+    ["vivify", "3"],
+    ["automapper", "3"],
+  ])],
+  ["ssj-g2", new Map<string, string>([
+    ["minBSR", "1"],
+    ["maxBSR", ""],
+    ["minDuration", "30"],
+    ["maxDuration", "420"],
+    ["minNPS", "0"],
+    ["maxNPS", "8"],
+    ["minBPM", ""],
+    ["maxBPM", ""],
+    ["noodle", "2"],
+    ["me", "2"],
+    ["chroma", "3"],
+    ["cinema", "3"],
+    ["vivify", "3"],
+    ["automapper", "3"],
+  ])],
+]);
 
 const checkerEndpoints: [string, boolean][] = [];
 process.env.checkerEndpoints
@@ -107,11 +164,57 @@ export default function Home() {
   const [warningMapper, setWarningMapper] = useState<boolean>(false);
   const [isDebug, setDebug] = useState<boolean>(false);
   const [debugBSR, setDebugBSR] = useState<string>("45c73");
+  const [minBSRValue, setMinBSRValue] = useState<string>("");
+  const [maxBSRValue, setMaxBSRValue] = useState<string>("");
+  const [minDurationValue, setMinDurationValue] = useState<string>("");
+  const [maxDurationValue, setMaxDurationValue] = useState<string>("");
+  const [minNPSValue, setMinNPSValue] = useState<string>("");
+  const [maxNPSValue, setMaxNPSValue] = useState<string>("");
+  const [minBPMValue, setMinBPMValue] = useState<string>("");
+  const [maxBPMValue, setMaxBPMValue] = useState<string>("");
+  const [noodleValue, setNoodleValue] = useState<string>("");
+  const [meValue, setMeValue] = useState<string>("");
+  const [chromaValue, setChromaValue] = useState<string>("");
+  const [cinemaValue, setCinemaValue] = useState<string>("");
+  const [vivifyValue, setVivifyValue] = useState<string>("");
+  const [automapperValue, setAutomapperValue] = useState<string>("");
+  const searchParams = useSearchParams();
 
   useEffect(() => {
     setDifficultyInfo("1");
+    setPreset();
+    setOptions();
   // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
+
+  function setPreset() {
+    const name = searchParams.get("preset");
+    if (!name || !optionsPresets.has(name)) {
+      return;
+    }
+    const preset = optionsPresets.get(name);
+    for (let i = 0; i < optionKeys.length; i++) {
+      const name = optionKeys[i];
+      options.set(name, preset?.get(name) || "");
+    }
+  }
+
+  function setOptions() {
+    setMinBSRValue(options.get("minBSR") || "");
+    setMaxBSRValue(options.get("maxBSR") || "");
+    setMinDurationValue(options.get("minDuration") || "");
+    setMaxDurationValue(options.get("maxDuration") || "");
+    setMinNPSValue(options.get("minNPS") || "");
+    setMaxNPSValue(options.get("maxNPS") || "");
+    setMinBPMValue(options.get("minBPM") || "");
+    setMaxBPMValue(options.get("maxBPM") || "");
+    setNoodleValue(options.get("noodle") || "1");
+    setMeValue(options.get("me") || "1");
+    setChromaValue(options.get("chroma") || "1");
+    setCinemaValue(options.get("cinema") || "1");
+    setVivifyValue(options.get("vivify") || "1");
+    setAutomapperValue(options.get("automapper") || "1");
+  }
 
   function sleep(msec: number) {
     return new Promise((resolve) => setTimeout(resolve, msec));
@@ -642,14 +745,21 @@ export default function Home() {
                     className="form-control"
                     id="min-bsr"
                     placeholder={"1以上"}
-                    onChange={(e) => onBSRChanged(e, "maxBSR")}
-                    defaultValue={"1"}
+                    onChange={(e) => {
+                      setMinBSRValue(e.currentTarget.value);
+                      onBSRChanged(e, "minBSR");
+                    }}
+                    value={minBSRValue}
                   />
                   <span className="input-group-text">~</span>
                   <input
                     className="form-control"
                     id="max-bsr"
-                    onChange={(e) => onBSRChanged(e, "minBSR")}
+                    onChange={(e) => {
+                      setMaxBSRValue(e.currentTarget.value);
+                      onBSRChanged(e, "maxBSR");
+                    }}
+                    value={maxBSRValue}
                   />
                 </div>
               </div>
@@ -662,15 +772,21 @@ export default function Home() {
                   <input
                     className="form-control"
                     id="min-duration"
-                    onChange={(e) => onNumberChanged(e, "minDuration")}
-                    defaultValue={"30"}
+                    onChange={(e) => {
+                      setMinDurationValue(e.currentTarget.value);
+                      onNumberChanged(e, "minDuration");
+                    }}
+                    value={minDurationValue}
                   />
                   <span className="input-group-text">~</span>
                   <input
                     className="form-control"
                     id="max-duration"
-                    onChange={(e) => onNumberChanged(e, "maxDuration")}
-                    defaultValue={"420"}
+                    onChange={(e) => {
+                      setMaxDurationValue(e.currentTarget.value);
+                      onNumberChanged(e, "maxDuration");
+                    }}
+                    value={maxDurationValue}
                   />
                 </div>
               </div>
@@ -683,15 +799,21 @@ export default function Home() {
                   <input
                     className="form-control"
                     id="min-nps"
-                    onChange={(e) => onNumberChanged(e, "minNPS")}
-                    defaultValue={"0"}
+                    onChange={(e) => {
+                      setMinNPSValue(e.currentTarget.value);
+                      onNumberChanged(e, "minNPS");
+                    }}
+                    value={minNPSValue}
                   />
                   <span className="input-group-text">~</span>
                   <input
                     className="form-control"
                     id="max-nps"
-                    onChange={(e) => onNumberChanged(e, "maxNPS")}
-                    defaultValue={"8"}
+                    onChange={(e) => {
+                      setMaxNPSValue(e.currentTarget.value);
+                      onNumberChanged(e, "maxNPS");
+                    }}
+                    value={maxNPSValue}
                   />
                 </div>
               </div>
@@ -704,13 +826,21 @@ export default function Home() {
                   <input
                     className="form-control"
                     id="min-bpm"
-                    onChange={(e) => onNumberChanged(e, "minBPM")}
+                    onChange={(e) => {
+                      setMinBPMValue(e.currentTarget.value);
+                      onNumberChanged(e, "minBPM");
+                    }}
+                    value={minBPMValue}
                   />
                   <span className="input-group-text">~</span>
                   <input
                     className="form-control"
                     id="max-bpm"
-                    onChange={(e) => onNumberChanged(e, "maxBPM")}
+                    onChange={(e) => {
+                      setMaxBPMValue(e.currentTarget.value);
+                      onNumberChanged(e, "maxBPM");
+                    }}
+                    value={maxBPMValue}
                   />
                 </div>
               </div>
@@ -718,10 +848,11 @@ export default function Home() {
               <div>
                 <label className="form-label">NoodleExtension</label>
                 <Select
-                  defaultValue="2"
                   onValueChange={(v) => {
+                    setNoodleValue(v);
                     onPDChanged(v, "noodle");
                   }}
+                  value={noodleValue}
                 >
                   <SelectTrigger>
                     <SelectValue placeholder="NoodleExtension" />
@@ -737,10 +868,11 @@ export default function Home() {
               <div>
                 <label className="form-label">MappingExtension</label>
                 <Select
-                  defaultValue="2"
                   onValueChange={(v) => {
+                    setMeValue(v);
                     onPDChanged(v, "me");
                   }}
+                  value={meValue}
                 >
                   <SelectTrigger>
                     <SelectValue placeholder="MappingExtension" />
@@ -756,10 +888,11 @@ export default function Home() {
               <div>
                 <label className="form-label">Chroma</label>
                 <Select
-                  defaultValue="3"
                   onValueChange={(v) => {
+                    setChromaValue(v);
                     onPDChanged(v, "chroma");
                   }}
+                  value={chromaValue}
                 >
                   <SelectTrigger>
                     <SelectValue placeholder="Chroma" />
@@ -775,10 +908,11 @@ export default function Home() {
               <div>
                 <label className="form-label">Cinema</label>
                 <Select
-                  defaultValue="3"
                   onValueChange={(v) => {
+                    setCinemaValue(v);
                     onPDChanged(v, "cinema");
                   }}
+                  value={cinemaValue}
                 >
                   <SelectTrigger>
                     <SelectValue placeholder="Cinema" />
@@ -794,10 +928,11 @@ export default function Home() {
               <div>
                 <label className="form-label">Vivify</label>
                 <Select
-                  defaultValue="3"
                   onValueChange={(v) => {
+                    setVivifyValue(v);
                     onPDChanged(v, "vivify");
                   }}
+                  value={vivifyValue}
                 >
                   <SelectTrigger>
                     <SelectValue placeholder="Vivify" />
@@ -813,10 +948,11 @@ export default function Home() {
               <div>
                 <label className="form-label">AutoMapper</label>
                 <Select
-                  defaultValue="3"
                   onValueChange={(v) => {
+                    setAutomapperValue(v);
                     onPDChanged(v, "automapper");
                   }}
+                  value={automapperValue}
                 >
                   <SelectTrigger>
                     <SelectValue placeholder="AutoMapper" />
