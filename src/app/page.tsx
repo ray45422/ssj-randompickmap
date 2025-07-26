@@ -1,6 +1,5 @@
 "use client";
 import { useState, useEffect } from "react";
-import { useSearchParams } from 'next/navigation'
 import axios, { AxiosError, AxiosHeaders } from "axios";
 import "bootstrap/dist/css/bootstrap.min.css";
 import "bootstrap-icons/font/bootstrap-icons.css";
@@ -178,7 +177,6 @@ export default function Home() {
   const [cinemaValue, setCinemaValue] = useState<string>("");
   const [vivifyValue, setVivifyValue] = useState<string>("");
   const [automapperValue, setAutomapperValue] = useState<string>("");
-  const searchParams = useSearchParams();
 
   useEffect(() => {
     setDifficultyInfo("1");
@@ -188,6 +186,7 @@ export default function Home() {
   }, []);
 
   function setPreset() {
+    const searchParams = new URLSearchParams(window.location.search);
     const name = searchParams.get("preset");
     if (!name || !optionsPresets.has(name)) {
       return;
