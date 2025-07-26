@@ -697,7 +697,7 @@ export default function Home() {
               </div>
 
               <div>
-                <label htmlFor="min-nps" className="form-label">
+                <label htmlFor="min-bpm" className="form-label">
                   BPM
                 </label>
                 <div className="input-group">
