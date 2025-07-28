@@ -49,7 +49,7 @@ export interface BeatMapUploader {
   admin: boolean;
   curator: boolean;
   seniorCurator: boolean;
-  verifiedMapper: boolean;
+  verifiedMapper?: boolean;
   playlistUrl: string;
 }
 
@@ -74,6 +74,7 @@ export interface BeatMap {
   blRanked: boolean;
   blQualified: boolean;
   nsfw?: boolean;
+  collaborators?: BeatMapUploader[];
 }
 
 const exp = {
