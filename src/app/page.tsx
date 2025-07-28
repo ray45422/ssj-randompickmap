@@ -1123,13 +1123,13 @@ export default function Home() {
                 {warningMap && (
                   <div className="warning-flag">
                     <i className="bi bi-exclamation-triangle-fill"></i>
-                    <span>ヤバ譜面です</span>
+                    <span>除外譜面です</span>
                   </div>
                 )}
                 {warningMapper && (
                   <div className="warning-flag">
                     <i className="bi bi-exclamation-triangle-fill"></i>
-                    <span>ヤバマッパーです</span>
+                    <span>除外マッパーです</span>
                   </div>
                 )}
                 <div className="difficulty-detail-info">
