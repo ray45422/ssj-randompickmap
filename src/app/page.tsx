@@ -491,7 +491,7 @@ export default function Home() {
       .then((resp) => {
         if (
           resp.data.values[0].find((v) =>
-            v.endsWith(`/${mapInfo.uploader?.id}`)
+            v.endsWith(`/${mapInfo.uploader?.id}`) || mapInfo.collaborators?.find((vv) => v.endsWith(`/${vv?.id}`))
           )
         ) {
           setWarningMapper(true);
