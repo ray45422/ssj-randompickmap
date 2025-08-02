@@ -1099,8 +1099,6 @@ export default function Home() {
                         プレイリストに追加
                       </button>
                     </div>
-                    <div><span>{canPlaylistAdd.toString()}</span></div>
-                    <div><span>{forcePlaylistAdd.toString()}</span></div>
                     {!canPlaylistAdd && <div className="mt-2">
                       <input id="warning-confirmation" type="checkbox" checked={forcePlaylistAdd} onChange={() => setForcePlaylistAdd(!forcePlaylistAdd)}></input>
                       <label htmlFor="warning-confirmation">強制的に追加します</label>
