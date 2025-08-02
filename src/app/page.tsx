@@ -155,7 +155,7 @@ export default function Home() {
     mapChckerEndpointInfomationMessages,
     setMapChckerEndpointInfomationMessages,
   ] = useState<string[]>([]);
-  const [addingPlaylist, setAddingPlaylist] = useState<boolean>(false);
+  const [canPlaylistAdd, setCanPlaylistAdd] = useState<boolean>(false);
   const [authRequired, setAuthRequired] = useState<boolean>(false);
   const [authUser, setAuthUser] = useState<string>();
   const [authPass, setAuthPass] = useState<string>();
@@ -177,6 +177,7 @@ export default function Home() {
   const [cinemaValue, setCinemaValue] = useState<string>("");
   const [vivifyValue, setVivifyValue] = useState<string>("");
   const [automapperValue, setAutomapperValue] = useState<string>("");
+  const [forcePlaylistAdd, setForcePlaylistAdd] = useState<boolean>(false);
 
   useEffect(() => {
     setDifficultyInfo("1");
@@ -286,6 +287,7 @@ export default function Home() {
               `代替エンドポイント(${ep})が使用されました。最新のチェック項目を満たしていない可能性があります。`
             );
           }
+          checkPlaylistAddable(result.data);
           break;
         } catch (e) {
           if (e instanceof AxiosError) {
@@ -308,45 +310,39 @@ export default function Home() {
   }
 
   async function addToPlaylist() {
-    setAddingPlaylist(true);
     setAuthRequired(false);
-    try {
-      console.log("hoge");
-      const params = {
-        id: bsr,
-        characteristic: characteristic,
-        difficulty: difficulty,
-      };
-      saveCredential();
-      const cred = localStorage.getItem("credential");
-      const headers = new AxiosHeaders();
-      headers.set("Content-Type", "application/json");
-      if (cred) {
-        headers.set("Authorization", `Basic ${cred}`);
-      }
-      const result = axios.post(
-        `${tournamentSystemEndpoint}/api/map`,
-        JSON.stringify(params),
-        {
-          headers: headers,
-        }
-      );
-      result
-        .then((resp) => {
-          console.log(resp);
-        })
-        .catch((resp) => {
-          if (!resp) {
-            return;
-          }
-          if (resp.status == 401) {
-            setAuthRequired(true);
-            return;
-          }
-        });
-    } finally {
-      setAddingPlaylist(false);
+    const params = {
+      id: bsr,
+      characteristic: characteristic,
+      difficulty: difficulty,
+    };
+    saveCredential();
+    const cred = localStorage.getItem("credential");
+    const headers = new AxiosHeaders();
+    headers.set("Content-Type", "application/json");
+    if (cred) {
+      headers.set("Authorization", `Basic ${cred}`);
     }
+    const result = axios.post(
+      `${tournamentSystemEndpoint}/api/map`,
+      JSON.stringify(params),
+      {
+        headers: headers,
+      }
+    );
+    result
+      .then((resp) => {
+        console.log(resp);
+      })
+      .catch((resp) => {
+        if (!resp) {
+          return;
+        }
+        if (resp.status == 401) {
+          setAuthRequired(true);
+          return;
+        }
+      });
   }
 
   async function generate() {
@@ -468,6 +464,8 @@ export default function Home() {
     ch: string | undefined = undefined,
     df: string | undefined = undefined
   ) {
+    setCanPlaylistAdd(false);
+    setForcePlaylistAdd(false);
     setMapChecking(false);
     setWarningMap(false);
     setWarningMapper(false);
@@ -720,6 +718,27 @@ export default function Home() {
   function saveCredential() {
     const cred = btoa(`${authUser}:${authPass}`);
     localStorage.setItem("credential", cred);
+  }
+
+  function checkPlaylistAddable(mapCheckResult: MapCheckResult | undefined) {
+    let result = true;
+    difficultyOptions.filter((v) => v.name == difficulty)
+      .map((v) => {
+        if (!v.valid) {
+          result = false;
+        }
+      });
+    mapCheckResult?.topics?.filter((v) =>
+      "difficultyName" in v
+        ? (v as MapCheckTopicDifficulty).characteristicName == characteristic &&
+          (v as MapCheckTopicDifficulty).difficultyName == difficulty
+        : true
+    )?.map((v) => {
+      if (v.result !== TopicResult.Valid) {
+        result = false;
+      }
+    });
+    setCanPlaylistAdd(result);
   }
 
   return (
@@ -1075,11 +1094,17 @@ export default function Home() {
                         className="btn btn-success"
                         id="add-to-playlist-button"
                         onClick={addToPlaylist}
-                        disabled={addingPlaylist}
+                        disabled={!canPlaylistAdd && !forcePlaylistAdd}
                       >
                         プレイリストに追加
                       </button>
                     </div>
+                    <div><span>{canPlaylistAdd.toString()}</span></div>
+                    <div><span>{forcePlaylistAdd.toString()}</span></div>
+                    {!canPlaylistAdd && <div className="mt-2">
+                      <input id="warning-confirmation" type="checkbox" checked={forcePlaylistAdd} onChange={() => setForcePlaylistAdd(!forcePlaylistAdd)}></input>
+                      <label htmlFor="warning-confirmation">強制的に追加します</label>
+                    </div>}
                   </div>
                 </div>
 
