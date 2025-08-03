@@ -186,6 +186,37 @@ export default function Home() {
   // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
+  useEffect(() => {
+    let result = true;
+    difficultyOptions.filter((v) => v.name == difficulty)
+      .map((v) => {
+        if (!v.valid) {
+          result = false;
+        }
+      });
+    if (!mapCheckResult) {
+      result = false;
+    } else {
+      mapCheckResult?.topics?.filter((v) =>
+        "difficultyName" in v
+          ? (v as MapCheckTopicDifficulty).characteristicName == characteristic &&
+            (v as MapCheckTopicDifficulty).difficultyName == difficulty
+          : true
+      )?.map((v) => {
+        if (v.result !== TopicResult.Valid) {
+          result = false;
+        }
+      });
+      if (warningMap) {
+        result = false;
+      }
+      if (warningMapper) {
+        result = false;
+      }
+    }
+    setCanPlaylistAdd(result);
+  }, [characteristic, difficulty, difficultyOptions, mapCheckResult, warningMap, warningMapper]);
+
   function setPreset() {
     const searchParams = new URLSearchParams(window.location.search);
     const name = searchParams.get("preset");
@@ -287,7 +318,6 @@ export default function Home() {
               `代替エンドポイント(${ep})が使用されました。最新のチェック項目を満たしていない可能性があります。`
             );
           }
-          checkPlaylistAddable(result.data);
           break;
         } catch (e) {
           if (e instanceof AxiosError) {
@@ -718,27 +748,6 @@ export default function Home() {
   function saveCredential() {
     const cred = btoa(`${authUser}:${authPass}`);
     localStorage.setItem("credential", cred);
-  }
-
-  function checkPlaylistAddable(mapCheckResult: MapCheckResult | undefined) {
-    let result = true;
-    difficultyOptions.filter((v) => v.name == difficulty)
-      .map((v) => {
-        if (!v.valid) {
-          result = false;
-        }
-      });
-    mapCheckResult?.topics?.filter((v) =>
-      "difficultyName" in v
-        ? (v as MapCheckTopicDifficulty).characteristicName == characteristic &&
-          (v as MapCheckTopicDifficulty).difficultyName == difficulty
-        : true
-    )?.map((v) => {
-      if (v.result !== TopicResult.Valid) {
-        result = false;
-      }
-    });
-    setCanPlaylistAdd(result);
   }
 
   return (
