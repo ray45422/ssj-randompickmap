@@ -280,6 +280,11 @@ export default function Home() {
       queryParams.set("characteristic", characteristic);
       queryParams.set("difficulty", difficulty);
       const query = queryParams.toString();
+      try {
+        await axios.get(`./check?${query}`)
+      } catch (e) {
+        console.error(e)
+      }
 
       for (let i = 0; i < checkerEndpoints.length; i++) {
         const epi = checkerEndpoints[i];
