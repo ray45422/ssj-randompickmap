@@ -1,6 +1,5 @@
 "use client";
 import { useState, useEffect } from "react";
-import axios, { AxiosError, AxiosHeaders } from "axios";
 import "bootstrap/dist/css/bootstrap.min.css";
 import "bootstrap-icons/font/bootstrap-icons.css";
 import {
@@ -300,7 +299,8 @@ export default function Home() {
       queryParams.set("difficulty", difficulty);
       const query = queryParams.toString();
       try {
-        await axios.get(`./check?${query}`);
+        // 別エンドポイントへのリクエスト時にはチェック内容がわからないので記録用リクエスト
+        fetch(`./check?${query}`);
       } catch (e) {
         console.error(e);
       }
@@ -312,11 +312,16 @@ export default function Home() {
         }
         const ep = epi[0];
         try {
-          const result = await axios.post<MapCheckResult>(
-            `${ep}/beatmaps/scanner/scan?${query}`,
-          );
+          const response = await fetch(`${ep}/beatmaps/scanner/scan?${query}`, {
+            method: "POST",
+          });
+          if (!response.ok) {
+            message.push(`エンドポイント(${ep})でエラーが発生しました`);
+            continue;
+          }
+          const result: MapCheckResult = await response.json();
           checkSuccess = true;
-          const invalidMapCheckTopics = result.data.topics
+          const invalidMapCheckTopics = result.topics
             .filter((t) => !("difficultyName" in t))
             .filter((t) => t.result === TopicResult.Invalid);
           if (invalidMapCheckTopics.length != 0) {
@@ -326,7 +331,7 @@ export default function Home() {
               });
             });
           }
-          result.data.topics
+          result.topics
             .filter((t) => "difficultyName" in t)
             .forEach((t) => {
               const di = characteristicDifficultyMap
@@ -336,7 +341,7 @@ export default function Home() {
                 di.valid = di.valid && t.result == TopicResult.Valid;
               }
             });
-          setMapCheckResult(result.data);
+          setMapCheckResult(result);
           if (i != 0) {
             message.push(
               `代替エンドポイント(${ep})が使用されました。最新のチェック項目を満たしていない可能性があります。`,
@@ -344,15 +349,10 @@ export default function Home() {
           }
           break;
         } catch (e) {
-          if (e instanceof AxiosError) {
-            epi[1] = false;
-            const ae = e as AxiosError;
-            message.push(
-              `エンドポイント(${ep})でエラーが発生しました: ${ae.message}`,
-            );
-          } else {
-            message.push(`エンドポイント(${ep})でエラーが発生しました`);
-          }
+          epi[1] = false;
+          message.push(
+            `エンドポイント(${ep})でエラーが発生しました: ${e.message}`,
+          );
         }
       }
     } finally {
@@ -372,18 +372,16 @@ export default function Home() {
     };
     saveCredential();
     const cred = localStorage.getItem("credential");
-    const headers = new AxiosHeaders();
+    const headers = new Headers();
     headers.set("Content-Type", "application/json");
     if (cred) {
       headers.set("Authorization", `Basic ${cred}`);
     }
-    const result = axios.post(
-      `${tournamentSystemEndpoint}/api/map`,
-      JSON.stringify(params),
-      {
-        headers: headers,
-      },
-    );
+    const result = fetch(`${tournamentSystemEndpoint}/api/map`, {
+      method: "POST",
+      headers: headers,
+      body: JSON.stringify(params),
+    });
     result
       .then((resp) => {
         console.log(resp);
@@ -526,31 +524,27 @@ export default function Home() {
     setMapChckerEndpointInfomationMessages([]);
     setMapCheckResult(undefined);
     if (mapInfo === undefined) {
-      const result = await axios.get<BeatMap>(
-        `${beatsaver.API_URL}/maps/id/${bsr}`,
-      );
-      mapInfo = result.data;
+      const response = await fetch(`${beatsaver.API_URL}/maps/id/${bsr}`);
+      mapInfo = (await response.json()) as BeatMap;
     }
-    axios
-      .get<SpreadsheetValues>(`${warnMapCheckEndpoint}/warning-map.json`)
-      .then((resp) => {
-        if (resp.data.values[0].find((v) => v.endsWith(`/${bsr}`))) {
-          setWarningMap(true);
-        }
-      });
-    axios
-      .get<SpreadsheetValues>(`${warnMapCheckEndpoint}/warning-mapper.json`)
-      .then((resp) => {
-        if (
-          resp.data.values[0].find(
-            (v) =>
-              v.endsWith(`/${mapInfo.uploader?.id}`) ||
-              mapInfo.collaborators?.find((vv) => v.endsWith(`/${vv?.id}`)),
-          )
-        ) {
-          setWarningMapper(true);
-        }
-      });
+    fetch(`${warnMapCheckEndpoint}/warning-map.json`).then(async (resp) => {
+      const value: SpreadsheetValues = await resp.json();
+      if (value.values[0].find((v) => v.endsWith(`/${bsr}`))) {
+        setWarningMap(true);
+      }
+    });
+    fetch(`${warnMapCheckEndpoint}/warning-mapper.json`).then(async (resp) => {
+      const value: SpreadsheetValues = await resp.json();
+      if (
+        value.values[0].find(
+          (v) =>
+            v.endsWith(`/${mapInfo.uploader?.id}`) ||
+            mapInfo.collaborators?.find((vv) => v.endsWith(`/${vv?.id}`)),
+        )
+      ) {
+        setWarningMapper(true);
+      }
+    });
     if (cdMap === undefined) {
       cdMap = getDifficultyInfo(mapInfo);
     }
@@ -575,12 +569,12 @@ export default function Home() {
 
   async function search(query: string, page: number = 0) {
     const searchRequestUrl = `${beatsaver.API_URL}/search/text/${page}?${query}`;
-    const result = await axios.get(searchRequestUrl);
-    if (result.status !== 200) {
+    const response = await fetch(searchRequestUrl);
+    if (!response.ok) {
       setSearchMessage("エラーが発生しました");
-      throw result;
+      throw response;
     }
-    const searchJson = result.data;
+    const searchJson = await response.json();
     return searchJson;
   }
 
@@ -633,9 +627,10 @@ export default function Home() {
     while (parseInt(nowBsrCode, 16) > 0) {
       let jsonData = mapCache.get(nowBsrCode);
       if (jsonData === undefined) {
-        jsonData = (
-          await axios.get<BeatMap>(`${beatsaver.API_URL}/maps/id/${nowBsrCode}`)
-        ).data;
+        const response = await fetch(
+          `${beatsaver.API_URL}/maps/id/${nowBsrCode}`,
+        );
+        jsonData = (await response.json()) as BeatMap;
       }
       if (jsonData) {
         mapCache.set(nowBsrCode, jsonData);
