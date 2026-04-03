@@ -755,6 +755,59 @@ export default function Home() {
     localStorage.setItem("credential", cred);
   }
 
+  function drawCheckErrors() {
+    if (mapChckerEndpointInfomationMessages.length == 0) {
+      return <div></div>;
+    }
+    return (
+      <div className="map-checker-endpoint-information-message">
+        {mapChckerEndpointInfomationMessages.map((v, i) => (
+          <span
+            className="map-checker-endpoint-information-message-txt"
+            key={i}
+          >
+            {v}
+          </span>
+        ))}
+      </div>
+    );
+  }
+
+  function drawMapCheckResult() {
+    if (!mapCheckResult) {
+      return <div></div>;
+    }
+    const currentTopics = mapCheckResult.topics.filter((v) =>
+      "difficultyName" in v
+        ? (v as MapCheckTopicDifficulty).characteristicName == characteristic &&
+          (v as MapCheckTopicDifficulty).difficultyName == difficulty
+        : true,
+    );
+    return (
+      <div className="map-checker-result">
+        <label>譜面チェック結果</label>
+        {currentTopics.map((v, i) => (
+          <div key={i}>
+            {v.result === TopicResult.Valid ? (
+              <i className="bi bi-check-circle-fill"></i>
+            ) : (
+              <i className="bi bi-exclamation-circle-fill"></i>
+            )}
+            <span>
+              {v.topicName} {(v as MapCheckTopicMod)?.dependencyName}
+            </span>
+            {"invalidWalls" in v &&
+              (v as MapCheckTopicInvalidWalls).invalidWalls.map((w, i) => (
+                <div key={i}>
+                  <span className="ml-4">{w.time}</span>
+                </div>
+              ))}
+          </div>
+        ))}
+      </div>
+    );
+  }
+
   return (
     <div className="grid grid-rows-[20px_1fr_20px] items-center justify-items-center min-h-screen font-[family-name:var(--font-geist-sans)]">
       <main className="flex flex-col gap-[1em] row-start-2 items-center sm:items-start app-main">
@@ -1257,53 +1310,8 @@ export default function Home() {
                     ))}
                 </div>
 
-                {mapChckerEndpointInfomationMessages.length != 0 && (
-                  <div className="map-checker-endpoint-information-message">
-                    {mapChckerEndpointInfomationMessages.map((v, i) => (
-                      <span
-                        className="map-checker-endpoint-information-message-txt"
-                        key={i}
-                      >
-                        {v}
-                      </span>
-                    ))}
-                  </div>
-                )}
-                {mapCheckResult && (
-                  <div className="map-checker-result">
-                    <label>譜面チェック結果</label>
-                    {mapCheckResult.topics
-                      .filter((v) =>
-                        "difficultyName" in v
-                          ? (v as MapCheckTopicDifficulty).characteristicName ==
-                              characteristic &&
-                            (v as MapCheckTopicDifficulty).difficultyName ==
-                              difficulty
-                          : true
-                      )
-                      .map((v, i) => (
-                        <div key={i}>
-                          {v.result === TopicResult.Valid ? (
-                            <i className="bi bi-check-circle-fill"></i>
-                          ) : (
-                            <i className="bi bi-exclamation-circle-fill"></i>
-                          )}
-                          <span>
-                            {v.topicName}{" "}
-                            {(v as MapCheckTopicMod)?.dependencyName}
-                          </span>
-                          {"invalidWalls" in v &&
-                            (v as MapCheckTopicInvalidWalls).invalidWalls.map(
-                              (w, i) => (
-                                <div key={i}>
-                                  <span className="ml-4">{w.time}</span>
-                                </div>
-                              )
-                            )}
-                        </div>
-                      ))}
-                  </div>
-                )}
+                {drawCheckErrors()}
+                {drawMapCheckResult()}
               </div>
             </AccordionContent>
           </AccordionItem>
