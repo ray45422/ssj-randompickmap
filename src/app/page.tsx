@@ -350,8 +350,12 @@ export default function Home() {
           break;
         } catch (e) {
           epi[1] = false;
+          let m = "";
+          if (e instanceof Error) {
+            m = `: ${e.message}`;
+          }
           message.push(
-            `エンドポイント(${ep})でエラーが発生しました: ${e.message}`,
+            `エンドポイント(${ep})でエラーが発生しました${m}`,
           );
         }
       }
