@@ -38,7 +38,7 @@ class DifficultyInfo {
     name: string,
     valid: boolean,
     reason: string[],
-    info: Difficulty
+    info: Difficulty,
   ) {
     this.characteristic = characteristic;
     this.name = name;
@@ -67,69 +67,77 @@ const optionKeys = [
   "cinema",
   "vivify",
   "automapper",
-]
+];
 const options: Map<string, string> = new Map([
-    ["minBSR", "1"],
-    ["maxBSR", ""],
-    ["minDuration", "30"],
-    ["maxDuration", "420"],
-    ["minNPS", "0"],
-    ["maxNPS", "8"],
-    ["minBPM", ""],
-    ["maxBPM", ""],
-    ["noodle", "2"],
-    ["me", "2"],
-    ["chroma", "3"],
-    ["cinema", "3"],
-    ["vivify", "3"],
-    ["automapper", "3"],
-  ]);
+  ["minBSR", "1"],
+  ["maxBSR", ""],
+  ["minDuration", "30"],
+  ["maxDuration", "420"],
+  ["minNPS", "0"],
+  ["maxNPS", "8"],
+  ["minBPM", ""],
+  ["maxBPM", ""],
+  ["noodle", "2"],
+  ["me", "2"],
+  ["chroma", "3"],
+  ["cinema", "3"],
+  ["vivify", "3"],
+  ["automapper", "3"],
+]);
 
 const optionsPresets: Map<string, Map<string, string>> = new Map([
-  ["ssj-g1", new Map<string, string>([
-    ["minBSR", "1"],
-    ["maxBSR", ""],
-    ["minDuration", "30"],
-    ["maxDuration", "420"],
-    ["minNPS", "0"],
-    ["maxNPS", ""],
-    ["minBPM", ""],
-    ["maxBPM", ""],
-    ["noodle", "2"],
-    ["me", "2"],
-    ["chroma", "3"],
-    ["cinema", "3"],
-    ["vivify", "3"],
-    ["automapper", "3"],
-  ])],
-  ["ssj-g2", new Map<string, string>([
-    ["minBSR", "1"],
-    ["maxBSR", ""],
-    ["minDuration", "30"],
-    ["maxDuration", "420"],
-    ["minNPS", "0"],
-    ["maxNPS", "8"],
-    ["minBPM", ""],
-    ["maxBPM", ""],
-    ["noodle", "2"],
-    ["me", "2"],
-    ["chroma", "3"],
-    ["cinema", "3"],
-    ["vivify", "3"],
-    ["automapper", "3"],
-  ])],
+  [
+    "ssj-g1",
+    new Map<string, string>([
+      ["minBSR", "1"],
+      ["maxBSR", ""],
+      ["minDuration", "30"],
+      ["maxDuration", "420"],
+      ["minNPS", "0"],
+      ["maxNPS", ""],
+      ["minBPM", ""],
+      ["maxBPM", ""],
+      ["noodle", "2"],
+      ["me", "2"],
+      ["chroma", "3"],
+      ["cinema", "3"],
+      ["vivify", "3"],
+      ["automapper", "3"],
+    ]),
+  ],
+  [
+    "ssj-g2",
+    new Map<string, string>([
+      ["minBSR", "1"],
+      ["maxBSR", ""],
+      ["minDuration", "30"],
+      ["maxDuration", "420"],
+      ["minNPS", "0"],
+      ["maxNPS", "8"],
+      ["minBPM", ""],
+      ["maxBPM", ""],
+      ["noodle", "2"],
+      ["me", "2"],
+      ["chroma", "3"],
+      ["cinema", "3"],
+      ["vivify", "3"],
+      ["automapper", "3"],
+    ]),
+  ],
 ]);
 
 const checkerEndpoints: [string, boolean][] = [];
 process.env.checkerEndpoints
   ?.split("|")
-  .map(url => url.endsWith("/") ? url.slice(0, -1) : url)
+  .map((url) => (url.endsWith("/") ? url.slice(0, -1) : url))
   .forEach((url) => checkerEndpoints.push([url, true]));
 
 const warnMapCheckEndpoint = process.env.warnMapCheckEndpoint?.endsWith("/")
   ? process.env.warnMapCheckEndpoint.slice(0, -1)
   : process.env.warnMapCheckEndpoint;
-const tournamentSystemEndpoint = process.env.tournamentSystemEndpoint?.endsWith("/")
+const tournamentSystemEndpoint = process.env.tournamentSystemEndpoint?.endsWith(
+  "/",
+)
   ? process.env.tournamentSystemEndpoint.slice(0, -1)
   : process.env.tournamentSystemEndpoint;
 
@@ -142,11 +150,11 @@ export default function Home() {
   const [searchMessage, setSearchMessage] = useState<string>("");
   const [beatMap, setBeatMap] = useState<BeatMap>();
   const [characteristicOptions, setCharacteristicOptions] = useState<string[]>(
-    []
+    [],
   );
   const [characteristic, setCharacteristic] = useState<string>("");
   const [difficultyOptions, setDifficultyOptions] = useState<DifficultyInfo[]>(
-    []
+    [],
   );
   const [difficulty, setDifficulty] = useState<string>("");
   const [mapChecking, setMapChecking] = useState<boolean>(false);
@@ -183,12 +191,13 @@ export default function Home() {
     setDifficultyInfo("1");
     setPreset();
     setOptions();
-  // eslint-disable-next-line react-hooks/exhaustive-deps
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   useEffect(() => {
     let result = true;
-    difficultyOptions.filter((v) => v.name == difficulty)
+    difficultyOptions
+      .filter((v) => v.name == difficulty)
       .map((v) => {
         if (!v.valid) {
           result = false;
@@ -197,16 +206,19 @@ export default function Home() {
     if (!mapCheckResult) {
       result = false;
     } else {
-      mapCheckResult?.topics?.filter((v) =>
-        "difficultyName" in v
-          ? (v as MapCheckTopicDifficulty).characteristicName == characteristic &&
-            (v as MapCheckTopicDifficulty).difficultyName == difficulty
-          : true
-      )?.map((v) => {
-        if (v.result !== TopicResult.Valid) {
-          result = false;
-        }
-      });
+      mapCheckResult?.topics
+        ?.filter((v) =>
+          "difficultyName" in v
+            ? (v as MapCheckTopicDifficulty).characteristicName ==
+                characteristic &&
+              (v as MapCheckTopicDifficulty).difficultyName == difficulty
+            : true,
+        )
+        ?.map((v) => {
+          if (v.result !== TopicResult.Valid) {
+            result = false;
+          }
+        });
       if (warningMap) {
         result = false;
       }
@@ -215,7 +227,14 @@ export default function Home() {
       }
     }
     setCanPlaylistAdd(result);
-  }, [characteristic, difficulty, difficultyOptions, mapCheckResult, warningMap, warningMapper]);
+  }, [
+    characteristic,
+    difficulty,
+    difficultyOptions,
+    mapCheckResult,
+    warningMap,
+    warningMapper,
+  ]);
 
   function setPreset() {
     const searchParams = new URLSearchParams(window.location.search);
@@ -281,9 +300,9 @@ export default function Home() {
       queryParams.set("difficulty", difficulty);
       const query = queryParams.toString();
       try {
-        await axios.get(`./check?${query}`)
+        await axios.get(`./check?${query}`);
       } catch (e) {
-        console.error(e)
+        console.error(e);
       }
 
       for (let i = 0; i < checkerEndpoints.length; i++) {
@@ -294,7 +313,7 @@ export default function Home() {
         const ep = epi[0];
         try {
           const result = await axios.post<MapCheckResult>(
-            `${ep}/beatmaps/scanner/scan?${query}`
+            `${ep}/beatmaps/scanner/scan?${query}`,
           );
           checkSuccess = true;
           const invalidMapCheckTopics = result.data.topics
@@ -320,7 +339,7 @@ export default function Home() {
           setMapCheckResult(result.data);
           if (i != 0) {
             message.push(
-              `代替エンドポイント(${ep})が使用されました。最新のチェック項目を満たしていない可能性があります。`
+              `代替エンドポイント(${ep})が使用されました。最新のチェック項目を満たしていない可能性があります。`,
             );
           }
           break;
@@ -329,7 +348,7 @@ export default function Home() {
             epi[1] = false;
             const ae = e as AxiosError;
             message.push(
-              `エンドポイント(${ep})でエラーが発生しました: ${ae.message}`
+              `エンドポイント(${ep})でエラーが発生しました: ${ae.message}`,
             );
           } else {
             message.push(`エンドポイント(${ep})でエラーが発生しました`);
@@ -363,7 +382,7 @@ export default function Home() {
       JSON.stringify(params),
       {
         headers: headers,
-      }
+      },
     );
     result
       .then((resp) => {
@@ -442,12 +461,12 @@ export default function Home() {
         cdMap,
         randomizedMapData,
         diff.characteristic,
-        diff.name
+        diff.name,
       );
       return;
     }
     setSearchMessage(
-      "リトライ回数内に条件を満たす譜面を見つけられませんでした"
+      "リトライ回数内に条件を満たす譜面を見つけられませんでした",
     );
   }
 
@@ -484,7 +503,7 @@ export default function Home() {
   }
 
   function setCharacteristicDifficultyMap(
-    cdMap: Map<string, Map<string, DifficultyInfo>>
+    cdMap: Map<string, Map<string, DifficultyInfo>>,
   ) {
     characteristicDifficultyMap.clear();
     cdMap.keys().forEach((c) => {
@@ -497,7 +516,7 @@ export default function Home() {
     cdMap: Map<string, Map<string, DifficultyInfo>> | undefined = undefined,
     mapInfo: BeatMap | undefined = undefined,
     ch: string | undefined = undefined,
-    df: string | undefined = undefined
+    df: string | undefined = undefined,
   ) {
     setCanPlaylistAdd(false);
     setForcePlaylistAdd(false);
@@ -508,7 +527,7 @@ export default function Home() {
     setMapCheckResult(undefined);
     if (mapInfo === undefined) {
       const result = await axios.get<BeatMap>(
-        `${beatsaver.API_URL}/maps/id/${bsr}`
+        `${beatsaver.API_URL}/maps/id/${bsr}`,
       );
       mapInfo = result.data;
     }
@@ -523,8 +542,10 @@ export default function Home() {
       .get<SpreadsheetValues>(`${warnMapCheckEndpoint}/warning-mapper.json`)
       .then((resp) => {
         if (
-          resp.data.values[0].find((v) =>
-            v.endsWith(`/${mapInfo.uploader?.id}`) || mapInfo.collaborators?.find((vv) => v.endsWith(`/${vv?.id}`))
+          resp.data.values[0].find(
+            (v) =>
+              v.endsWith(`/${mapInfo.uploader?.id}`) ||
+              mapInfo.collaborators?.find((vv) => v.endsWith(`/${vv?.id}`)),
           )
         ) {
           setWarningMapper(true);
@@ -548,7 +569,7 @@ export default function Home() {
     setDifficulty(df);
     setCharacteristicOptions(Array.from(characteristicDifficultyMap.keys()));
     setDifficultyOptions(
-      characteristicDifficultyMap.get(ch)!.values().toArray()
+      characteristicDifficultyMap.get(ch)!.values().toArray(),
     );
   }
 
@@ -632,7 +653,7 @@ export default function Home() {
     diff: Difficulty,
     minNPS: number,
     maxNPS: number,
-    modOptions: Map<string, boolean>
+    modOptions: Map<string, boolean>,
   ): DifficultyInfo {
     const c = diff.characteristic;
     let valid = true;
@@ -676,7 +697,7 @@ export default function Home() {
       diff.difficulty,
       valid,
       reason,
-      diff
+      diff,
     );
   }
 
@@ -706,7 +727,7 @@ export default function Home() {
 
   function onNumberChanged(
     e: React.ChangeEvent<HTMLInputElement>,
-    name: string
+    name: string,
   ) {
     const v = e.target.value;
     if (numberValidateion(v)) {
@@ -1166,10 +1187,21 @@ export default function Home() {
                         プレイリストに追加
                       </button>
                     </div>
-                    {!canPlaylistAdd && <div className="mt-2">
-                      <input id="warning-confirmation" type="checkbox" checked={forcePlaylistAdd} onChange={() => setForcePlaylistAdd(!forcePlaylistAdd)}></input>
-                      <label htmlFor="warning-confirmation">強制的に追加します</label>
-                    </div>}
+                    {!canPlaylistAdd && (
+                      <div className="mt-2">
+                        <input
+                          id="warning-confirmation"
+                          type="checkbox"
+                          checked={forcePlaylistAdd}
+                          onChange={() =>
+                            setForcePlaylistAdd(!forcePlaylistAdd)
+                          }
+                        ></input>
+                        <label htmlFor="warning-confirmation">
+                          強制的に追加します
+                        </label>
+                      </div>
+                    )}
                   </div>
                 </div>
 
