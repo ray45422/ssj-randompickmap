@@ -388,6 +388,10 @@ export default function Home() {
     });
     result
       .then((resp) => {
+        if (resp.status == 401) {
+          setAuthRequired(true);
+          return;
+        }
         console.log(resp);
       })
       .catch((resp) => {
