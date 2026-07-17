@@ -7,6 +7,7 @@ const nextConfig: NextConfig = {
     tournamentSystemEndpoint: "http://localhost",
     warnMapCheckEndpoint: "http://localhost",
     checkerEndpoints: "http://localhost|http://localhost:8080",
+    debugDefaultBsr: "",
   }
 };
 

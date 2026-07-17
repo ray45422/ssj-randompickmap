@@ -169,7 +169,7 @@ export default function Home() {
   const [warningMap, setWarningMap] = useState<boolean>(false);
   const [warningMapper, setWarningMapper] = useState<boolean>(false);
   const [isDebug, setDebug] = useState<boolean>(false);
-  const [debugBSR, setDebugBSR] = useState<string>("45c73");
+  const [debugBSR, setDebugBSR] = useState<string>(process.env.debugDefaultBsr!);
   const [minBSRValue, setMinBSRValue] = useState<string>("");
   const [maxBSRValue, setMaxBSRValue] = useState<string>("");
   const [minDurationValue, setMinDurationValue] = useState<string>("");
@@ -440,9 +440,10 @@ export default function Home() {
     for (let retry = 0; retry < 5; retry++) {
       const randomizedNumber = getRandomNumber(0, searchJson.info.total - 1);
       const page = Math.floor(randomizedNumber / 20);
+      const totalPage = Math.ceil(searchJson.info.total/20)
       console.log("total:", searchJson.info.total);
       console.log("randomized num:", randomizedNumber);
-      console.log(`page:${page}\nindex:${randomizedNumber % 20}`);
+      console.log(`page:${page}/${totalPage}\nindex:${randomizedNumber % 20}`);
       const randomizedJsonData = await search(queryString, page);
       const randomizedMapData = randomizedJsonData.docs[
         randomizedNumber % 20
