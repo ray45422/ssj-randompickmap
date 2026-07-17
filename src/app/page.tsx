@@ -144,7 +144,7 @@ export default function Home() {
   const [hash, setHash] = useState<string>("");
   const [generating, setGenerating] = useState<boolean>(false);
   const mapCache: Map<string, BeatMap> = new Map();
-  const [bsr, setBSR] = useState<string>("1");
+  const [bsr, setBSR] = useState<string>(process.env.defaultBsr!);
   const [copyMessage, setCopyMessage] = useState<string>("");
   const [searchMessage, setSearchMessage] = useState<string>("");
   const [beatMap, setBeatMap] = useState<BeatMap>();
@@ -187,7 +187,7 @@ export default function Home() {
   const [forcePlaylistAdd, setForcePlaylistAdd] = useState<boolean>(false);
 
   useEffect(() => {
-    setDifficultyInfo("1");
+    setDifficultyInfo(process.env.defaultBsr!);
     setPreset();
     setOptions();
     // eslint-disable-next-line react-hooks/exhaustive-deps
